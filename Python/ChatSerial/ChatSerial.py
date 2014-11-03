@@ -13,8 +13,8 @@ def drawScreen():
     for i,m in enumerate(mMessages):
         s = ""
         if m.startswith("**:"):
-            mScreen.addstr(i,0,"**:", curses.color_pair(1))
             s = m.replace("**:", "")
+            mScreen.addstr(i,0,"**:", curses.color_pair(1))
         elif m.startswith("~~:"):
             s = m.replace("~~:", "")
             mScreen.addstr(i,0,"~~:", curses.color_pair(2))
@@ -32,10 +32,11 @@ class readThread (Thread):
             for line in mSerial:
                 if(len(mMessages) == mScreen.getmaxyx()[0]-5):
                     del mMessages[0]
+
                 mMessages.append("~~: "+line)
 
-            drawScreen()
-    
+                drawScreen()
+
     def stop(self):
         self.mThreadRunning = False
 
@@ -53,8 +54,9 @@ class writeThread (Thread):
             if event == ord("\n"):
                 if(len(mMessages) == mScreen.getmaxyx()[0]-5):
                     del mMessages[0]
-                mMessages.append("**: "+self.currentString+"\n")
-                mSerial.write(self.currentString+"\n")
+
+                mMessages.append("**: "+self.currentString)
+                mSerial.write(self.currentString+'\n')
                 self.currentString  = ""
                 mScreen.addstr(mScreen.getmaxyx()[0]-5,0,"**: "+self.currentString)
                 mScreen.clrtoeol()
@@ -114,8 +116,8 @@ def cleanUp():
     mReadThread.stop()
     cprint("STOPPING WRITE THREAD", 'red', attrs=['bold', 'reverse'], end='\n')
     mWriteThread.stop()
-    mReadThread.join()
-    mWriteThread.join()
+    mReadThread.join(1)
+    mWriteThread.join(1)
 
 if __name__=="__main__":
     setup()
