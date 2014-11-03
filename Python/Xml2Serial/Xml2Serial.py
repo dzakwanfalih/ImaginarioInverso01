@@ -2,6 +2,7 @@ from time import sleep, time
 from threading import Thread
 from sys import exit
 from random import randint
+from re import sub
 from serial import Serial
 from termcolor import colored, cprint
 from xml.dom import minidom
@@ -13,15 +14,40 @@ SERIAL_WRITE_DELAY = 1.0
 
 MAX_QUEUE_SIZE = 64
 
-def getDataFromXml():
-    url = "http://www.xmlfiles.com/examples/cd_catalog.xml"
-    xml = minidom.parseString(urlopen(url).read())
+def cleanContent(txt):
+    # cambiar los <p> por XX.
+    txt = sub(r'< *p *>', 'XX.', txt)
 
-    cds = xml.getElementsByTagName('CD')
-    cd = cds[randint(0,len(cds)-1)]
-    title = cd.getElementsByTagName('TITLE')[0].childNodes[0].nodeValue.decode('utf-8')
-    artist = cd.getElementsByTagName('ARTIST')[0].childNodes[0].nodeValue.decode('utf-8')
-    return (title, artist)
+    # cambiar los </p> por \n (newline)
+    txt = sub(r'< */p *>', '\n', txt)
+
+    # cambiar los <h1>, <h2>, etc por \n (newline)
+    txt = sub(r'< *h[0-9] *>', '\n', txt)
+
+    # sacar todos los otros tags
+    txt = sub(r'<.*?>', '', txt)
+
+    # sacar whitespace
+    txt = sub(r'^\s+', '', txt)
+    txt = sub(r'\s\s+', '\n\n', txt)
+
+    return txt
+
+def getDataFromXml():
+    url = "http://hackcoop.com.mx/accionesterritoriales/?page_id=117"
+    ucontent = urlopen(url).read().decode('iso8859-15').encode('utf8')
+
+    xml = minidom.parseString(ucontent)
+    post = xml.getElementsByTagName('Post')[0]
+
+    title = post.getElementsByTagName('Title')[0].childNodes[0].nodeValue
+    author = post.getElementsByTagName('Author')[0].childNodes[0].nodeValue
+    date = post.getElementsByTagName('Date')[0].childNodes[0].nodeValue
+    content = post.getElementsByTagName('Content')[0].childNodes[0].nodeValue
+
+    content = cleanContent(content)
+
+    return "%sTTAADD%sTTAADD%sTTAADD%s"%(title, author, date, content)
 
 def setup():
     global mSerial, mQueue, mQueueReadIndex, mQueueWriteIndex, mLastSerialWrite
@@ -60,9 +86,8 @@ def loop():
         ## try to write to serial
         if(len(mQueue) > 0):
             try:
-                (txt,author) = mQueue[mQueueReadIndex]
-                txt = txt.encode('utf-8')
-                author = author.encode('utf-8')
+                txt = mQueue[mQueueReadIndex]
+                txt = txt.encode('iso8859-15')
                 mSerial.write(txt+"\n")
             except Exception as e:
                 cprint("COULDN'T WRITE TO SERIAL PORT:", 'red', attrs=['bold', 'reverse'], end='\n')
@@ -80,7 +105,11 @@ def loop():
         cprint("DE", 'grey', attrs=['bold'], end='')
         cprint("PI ", 'red', attrs=['bold', 'reverse'], end='\n')
         cprint("OUTPUT", attrs=['bold', 'blink'], end=': ')
-        cprint(msg, end='\n')
+        (title, author, date, content) = msg.split("TTAADD")
+        cprint(author, 'blue', attrs=['bold'], end=' (')
+        cprint(date, 'blue', attrs=['bold'], end=')\n')
+        cprint(title, attrs=['bold'], end='\n')
+        cprint(content, end='\n')
 
 def cleanUp():
     cprint("STOPPING SERIAL PORT", 'red', attrs=['bold', 'reverse'], end='\n')
