@@ -1,6 +1,7 @@
 from time import sleep, time
 from threading import Thread
 from sys import exit
+from os import system
 from random import randint
 from re import sub
 from serial import Serial
@@ -100,6 +101,7 @@ def loop():
     for line in mSerial:
         msg += line
     if msg:
+        system('printf "\033c"')
         cprint(" ASTROVANDALISTAS * ", attrs=['bold', 'reverse'], end=' ')
         cprint(" CO", 'green', attrs=['bold','reverse'], end='')
         cprint("DE", 'grey', attrs=['bold'], end='')
