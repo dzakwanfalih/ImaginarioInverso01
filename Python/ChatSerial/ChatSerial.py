@@ -5,7 +5,7 @@ from serial import Serial
 from termcolor import colored, cprint
 import curses
 
-SERIAL_PORT_NAME = "/dev/AMA0"
+SERIAL_PORT_NAME = "/dev/ttyAMA0"
 SERIAL_BAUD_RATE = 9600
 
 def drawScreen():
