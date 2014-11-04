@@ -19,6 +19,7 @@ def drawScreen():
             s = m.replace("~~:", "")
             mScreen.addstr(i,0,"~~:", curses.color_pair(2))
 
+        s = "".join(s.split('\x00'))
         mScreen.addstr(i,mScreen.getyx()[1],s)
     mScreen.refresh()
 
