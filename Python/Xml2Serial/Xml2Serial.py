@@ -9,7 +9,7 @@ from termcolor import colored, cprint
 from xml.dom import minidom
 from urllib2 import urlopen
 
-SERIAL_PORT_NAME = "/dev/AMA0"
+SERIAL_PORT_NAME = "/dev/ttyAMA0"
 SERIAL_BAUD_RATE = 9600
 SERIAL_WRITE_DELAY = 1.0
 
