@@ -73,7 +73,7 @@ for root, dirs, files in os.walk(currentPath):
                             newU = u.replace(THEME_LOCATION, os.path.join(os.path.join("../"*depth,LOCAL_THEMES_DIRECTORY_NAME),""))
                             line = line.replace(u, newU, 1)
                         ## if reference to another file (.js, .css), download it into assets if necessary and change link (also keep track of relative dir location)
-                        elif u.endswith(".css") or u.endswith(".js"):
+                        elif ((u.endswith(".css") or u.endswith(".js") or u.endswith(".jpg") or u.endswith(".jpeg") or u.endswith(".gif") or u.endswith(".png")) and (not "localhost" in u)):
                             filename = u.split("/")[-1]
                             if not os.path.isfile(os.path.join(LOCAL_ASSETS_DIRECTORY_NAME, filename)):
                                 print "copying "+u+" -> "+os.path.join(LOCAL_ASSETS_DIRECTORY_NAME, filename)
