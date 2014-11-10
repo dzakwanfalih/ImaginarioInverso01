@@ -7,7 +7,8 @@ import os
 import re
 import shutil
 
-ABSOLUTE_LOCATION = "http://www.memememememememe.me/wp-content/plugins/really-static/static/"
+ABSOLUTE_LOCATION = "http://astrovandalistas.cc/accionesterritoriales/wp-content/plugins/really-static/static/"
+THEME_LOCATION = "http://astrovandalistas.cc/accionesterritoriales/wp-content/themes/"
 ONLINE_FONT_LOCATION = "http://www.thiagohersan.com/tmp/fonts"
 
 ## output 
@@ -27,6 +28,12 @@ LOCAL_FONTS_DIRECTORY_NAME = os.path.join("wp-content","fonts")
 if os.path.exists(LOCAL_FONTS_DIRECTORY_NAME):
     shutil.rmtree(LOCAL_FONTS_DIRECTORY_NAME)
 os.makedirs(LOCAL_FONTS_DIRECTORY_NAME)
+
+## theme
+LOCAL_THEMES_DIRECTORY_NAME = os.path.join("wp-content","themes")
+if os.path.exists(LOCAL_THEMES_DIRECTORY_NAME):
+    shutil.rmtree(LOCAL_THEMES_DIRECTORY_NAME)
+os.makedirs(LOCAL_THEMES_DIRECTORY_NAME)
 
 ## download font directory
 filenames = re.findall(r"href=\"(.*?\.(?:ttf|css|txt))\"", urllib2.urlopen(ONLINE_FONT_LOCATION).read().decode('utf-8'))
@@ -55,6 +62,15 @@ for root, dirs, files in os.walk(currentPath):
                         ## if reference to ABSOLUTE_LOCATION, change it (keep track of where we are in the directory structure)
                         if ABSOLUTE_LOCATION in u:
                             newU = u.replace(ABSOLUTE_LOCATION, "../"*depth)
+                            line = line.replace(u, newU, 1)
+                        ## if reference to THEME_LOCATION, change it (keep track of where we are in the directory structure)
+                        elif THEME_LOCATION in u:
+                            filepath = u.replace(THEME_LOCATION, "")
+                            if not os.path.exists(os.path.dirname(os.path.join(LOCAL_THEMES_DIRECTORY_NAME, filepath))):
+                                os.makedirs(os.path.dirname(os.path.join(LOCAL_THEMES_DIRECTORY_NAME, filepath)))
+                            if not os.path.isfile(os.path.join(LOCAL_THEMES_DIRECTORY_NAME, filepath)):
+                                urllib.URLopener().retrieve(u, os.path.join(LOCAL_THEMES_DIRECTORY_NAME, filepath))
+                            newU = u.replace(THEME_LOCATION, os.path.join(os.path.join("../"*depth,LOCAL_THEMES_DIRECTORY_NAME),""))
                             line = line.replace(u, newU, 1)
                         ## if reference to another file (.js, .css), download it into assets if necessary and change link (also keep track of relative dir location)
                         elif u.endswith(".css") or u.endswith(".js"):
