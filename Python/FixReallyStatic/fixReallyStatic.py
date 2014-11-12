@@ -9,7 +9,6 @@ import shutil
 
 ABSOLUTE_LOCATION = "http://astrovandalistas.cc/accionesterritoriales/wp-content/plugins/really-static/static/"
 THEME_LOCATION = "http://astrovandalistas.cc/accionesterritoriales/wp-content/themes/"
-ONLINE_FONT_LOCATION = "http://www.thiagohersan.com/tmp/fonts"
 
 ## output 
 RELATIVE_DIRECTORY_NAME = os.path.join("..","static-relative")
@@ -23,25 +22,11 @@ if os.path.exists(LOCAL_ASSETS_DIRECTORY_NAME):
     shutil.rmtree(LOCAL_ASSETS_DIRECTORY_NAME)
 os.makedirs(LOCAL_ASSETS_DIRECTORY_NAME)
 
-## fonts
-LOCAL_FONTS_DIRECTORY_NAME = os.path.join("wp-content","fonts")
-if os.path.exists(LOCAL_FONTS_DIRECTORY_NAME):
-    shutil.rmtree(LOCAL_FONTS_DIRECTORY_NAME)
-os.makedirs(LOCAL_FONTS_DIRECTORY_NAME)
-
 ## theme
 LOCAL_THEMES_DIRECTORY_NAME = os.path.join("wp-content","themes")
 if os.path.exists(LOCAL_THEMES_DIRECTORY_NAME):
     shutil.rmtree(LOCAL_THEMES_DIRECTORY_NAME)
 os.makedirs(LOCAL_THEMES_DIRECTORY_NAME)
-
-## download font directory
-filenames = re.findall(r"href=\"(.*?\.(?:ttf|css|txt))\"", urllib2.urlopen(ONLINE_FONT_LOCATION).read().decode('utf-8'))
-for f in filenames:
-    if f.endswith(".css"):
-        LOCAL_FONTS_CSS_FILE = os.path.join(LOCAL_FONTS_DIRECTORY_NAME, f)
-    urllib.URLopener().retrieve(ONLINE_FONT_LOCATION+"/"+f, os.path.join(LOCAL_FONTS_DIRECTORY_NAME, f))
-
 
 ## iterate over all directories, find html files
 currentPath = "./"
@@ -83,9 +68,6 @@ for root, dirs, files in os.walk(currentPath):
                                 urllib.URLopener().retrieve(picu, os.path.join(LOCAL_ASSETS_DIRECTORY_NAME, filename))
                             newU = os.path.join(os.path.join("../"*depth,LOCAL_ASSETS_DIRECTORY_NAME), filename)
                             line = line.replace(u, newU, 1)
-                        ## fonts
-                        elif "fonts.googleapis.com" in u:
-                            line = "<link href='%s' rel='stylesheet' type='text/css'>\n"%(os.path.join("../"*depth, LOCAL_FONTS_CSS_FILE))
 
                     out.write(line)
 
