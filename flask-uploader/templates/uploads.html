@@ -1,0 +1,23 @@
+<!doctype html>
+<title>uploads</title>
+
+
+
+
+<div class="page">
+  <h1>uploads</h1>
+  <div class="metanav">
+  </div>
+  {% for file in uploads %}
+    <div class="flash">
+		<img src="{{ file.url }}"/>
+    </div>
+
+    <div class="flash">
+		<a href="{{ file.url }}">
+    	{{ file.name }} : {{ file.id }}
+    	</a>
+    </div>
+  {% endfor %}
+  {% block body %}{% endblock %}
+</div>
