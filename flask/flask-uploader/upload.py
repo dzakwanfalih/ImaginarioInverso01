@@ -34,6 +34,8 @@ def index():
     return render_template('uploads.html', uploads=uploads)
 
 
+
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     """Upload a new file."""
