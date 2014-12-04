@@ -3,7 +3,7 @@ from flask import Flask, redirect, request, render_template, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.storage import get_default_storage_class
 from flask.ext.uploads import delete, init, save, Upload
-
+from werkzeug import secure_filename
 # app = Flask(__name__)
 # # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 # app.config['DEFAULT_FILE_STORAGE'] = 'filesystem'
@@ -15,8 +15,11 @@ from flask.ext.uploads import delete, init, save, Upload
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['DEFAULT_FILE_STORAGE'] = 'filesystem'
+app.config['UPLOADED_FILES_ALLOW'] = 'jpg'
+app.config['UPLOADED_FILES_DENY'] = 'png'
 app.config['UPLOADS_FOLDER'] = os.path.realpath('.') + '/static/'
 app.config['FILE_SYSTEM_STORAGE_FILE_VIEW'] = 'static'
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
 db = SQLAlchemy(app)
 
 Storage = get_default_storage_class(app)
@@ -24,6 +27,12 @@ Storage = get_default_storage_class(app)
 init(db, Storage)
 
 db.create_all()
+
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
@@ -41,7 +50,13 @@ def upload():
     """Upload a new file."""
     if request.method == 'POST':
         print 'saving'
-        save(request.files['upload'])
+
+        file = request.files['upload']
+        print file.filename
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            save(request.files['upload'])
+
         return redirect(url_for('index'))
     return (
         u'<form method="POST" enctype="multipart/form-data">'
